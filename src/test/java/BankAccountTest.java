@@ -8,17 +8,23 @@ public class BankAccountTest {
 
     // private BankAccount account;
 
-    @BeforeEach
-    public void setUp() {
-        // Thiết lập môi trường kiểm thử trước mỗi bài kiểm thử
-        // account = new BankAccount();
+    // @BeforeEach
+    // public void setUp() {
+    // // Thiết lập môi trường kiểm thử trước mỗi bài kiểm thử
+    // // account = new BankAccount();
+    // }
+
+    @Test
+    public void testInitialBalance() {
+        BankAccount account = new BankAccount();
+        assertEquals(0.0, account.getBalance(), "Initial balance should be 0.0.");
     }
 
     @Test
-    public void testDeposit() {
+    public void testDepositPositiveAmount() {
         BankAccount account = new BankAccount();
         account.deposit(100.0);
-        assertEquals(100.0, account.getBalance(), "Balance should be 100.0 after deposit.");
+        assertEquals(100.0, account.getBalance(), "Balance should be 100.0 after depositing 100.0.");
     }
 
     @Test
@@ -102,5 +108,45 @@ public class BankAccountTest {
         account.deposit(100.0);
         account.withdraw(100.0);
         assertEquals(0.0, account.getBalance(), "Balance should be 0.0 after withdrawing all funds.");
+    }
+
+    @Test
+    public void testConcurrencySafety() {
+        BankAccount account = new BankAccount();
+        // Kiểm tra tính an toàn trong môi trường đa luồng
+        account.deposit(1000.0);
+        Runnable withdrawTask = () -> {
+            for (int i = 0; i < 10; i++) {
+                account.withdraw(10.0);
+            }
+        };
+
+        Thread thread1 = new Thread(withdrawTask);
+        Thread thread2 = new Thread(withdrawTask);
+        thread1.start();
+        thread2.start();
+
+        try {
+            thread1.join();
+            thread2.join();
+        } catch (InterruptedException e) {
+            fail("Thread interrupted.");
+        }
+
+        assertEquals(800.0, account.getBalance(), "Balance should be consistent after concurrent withdrawals.");
+    }
+
+    @Test
+    public void testLargeTransactionAmount() {
+        BankAccount account = new BankAccount();
+        account.deposit(1_000_000.0);
+        assertEquals(1_000_000.0, account.getBalance(), "Balance should handle large transaction amounts correctly.");
+    }
+
+    @Test
+    public void testSmallTransactionAmount() {
+        BankAccount account = new BankAccount();
+        account.deposit(0.01);
+        assertEquals(0.01, account.getBalance(), "Balance should handle small transaction amounts correctly.");
     }
 }

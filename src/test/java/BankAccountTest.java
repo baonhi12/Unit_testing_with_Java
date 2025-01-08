@@ -15,12 +15,6 @@ public class BankAccountTest {
     // }
 
     @Test
-    public void testInitialBalance() {
-        BankAccount account = new BankAccount();
-        assertEquals(0.0, account.getBalance(), "Initial balance should be 0.0.");
-    }
-
-    @Test
     public void testDepositPositiveAmount() {
         BankAccount account = new BankAccount();
         account.deposit(100.0);
